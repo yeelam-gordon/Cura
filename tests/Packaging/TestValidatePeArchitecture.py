@@ -33,6 +33,12 @@ def test_arm64_x64_and_malformed(tmp_path, capsys):
     assert "truncated DOS header" in capsys.readouterr().err
 
 
+def test_unsupported_architecture_fails_cleanly(tmp_path, capsys):
+    write_pe(tmp_path / "arm.exe", 0xAA64)
+    assert validator.validate(tmp_path, "sparc", [], None) == 1
+    assert "unsupported architecture: sparc" in capsys.readouterr().err
+
+
 def test_recursive_ordering_and_deterministic_manifest(tmp_path):
     z_data = write_pe(tmp_path / "z.DLL", 0xAA64, b"z")
     a_data = write_pe(tmp_path / "Nested" / "a.exe", 0xAA64, b"a")

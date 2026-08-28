@@ -8,6 +8,7 @@ from pathlib import Path, PurePosixPath
 
 MACHINES = {"arm64": 0xAA64, "x64": 0x8664}
 PE_SUFFIXES = {".exe", ".dll", ".pyd"}
+HASH_CHUNK_SIZE = 1024 * 1024
 
 
 def read_machine(path: Path) -> int:
@@ -41,13 +42,27 @@ def candidates(root: Path) -> list[tuple[str, Path]]:
     return sorted(files, key=lambda item: (item[0].casefold(), item[0]))
 
 
+def file_size_and_sha256(path: Path) -> tuple[int, str]:
+    digest = hashlib.sha256()
+    size = 0
+    with path.open("rb") as stream:
+        while chunk := stream.read(HASH_CHUNK_SIZE):
+            size += len(chunk)
+            digest.update(chunk)
+    return size, digest.hexdigest()
+
+
 def validate(
     root: Path,
     architecture: str,
     required: list[str],
     manifest_out: Path | None,
 ) -> int:
-    expected = MACHINES[architecture]
+    expected = MACHINES.get(architecture)
+    if expected is None:
+        print(f"ERROR: unsupported architecture: {architecture}", file=sys.stderr)
+        return 1
+
     found = candidates(root)
     failures: list[str] = []
     records = []
@@ -64,12 +79,12 @@ def validate(
     for relative, path in found:
         try:
             machine = read_machine(path)
-            data = path.read_bytes()
+            size, sha256 = file_size_and_sha256(path)
             records.append(
                 {
                     "path": relative,
-                    "size": len(data),
-                    "sha256": hashlib.sha256(data).hexdigest(),
+                    "size": size,
+                    "sha256": sha256,
                     "machine": f"0x{machine:04X}",
                 }
             )
