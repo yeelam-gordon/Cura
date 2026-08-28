@@ -85,7 +85,7 @@ def generate_nsi(source_path: str, dist_path: str, filename: str, version: str):
 def build(dist_path: str, filename: str):
     dist_loc = Path(os.getcwd(), dist_path)
     command = ["makensis", "/V2", "/P4", str(dist_loc.joinpath("UltiMaker-Cura.nsi"))]
-    subprocess.run(command, check=True)
+    subprocess.run(command, check=True, cwd=dist_loc)
     output = dist_loc.joinpath(filename)
     if not output.is_file() or output.stat().st_size == 0:
         raise RuntimeError(f"NSIS output was not created or is empty: {output}")

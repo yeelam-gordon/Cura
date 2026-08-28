@@ -24,13 +24,15 @@ with patch.dict(
 def test_build_uses_check_and_requires_nonempty_output(tmp_path):
     (tmp_path / "UltiMaker-Cura.nsi").write_text("nsi", encoding="utf-8")
 
-    def successful(command, check):
+    def successful(command, check, cwd):
         assert check is True
+        assert cwd == tmp_path
         (tmp_path / "cura.exe").write_bytes(b"exe")
 
     with patch.object(installer.subprocess, "run", side_effect=successful) as run:
         installer.build(str(tmp_path), "cura.exe")
     assert run.call_args.kwargs["check"] is True
+    assert run.call_args.kwargs["cwd"] == tmp_path
 
 
 def test_nonzero_tool_failure_propagates(tmp_path):
