@@ -63,11 +63,13 @@ def validate(
         print(f"ERROR: unsupported architecture: {architecture}", file=sys.stderr)
         return 1
 
-    found = candidates(root)
     failures: list[str] = []
-    records = []
+    if not root.exists():
+        failures.append(f"{root}: path does not exist")
+    found = candidates(root)
+    inspected: list[tuple[str, Path, int]] = []
 
-    if not found:
+    if not found and root.exists():
         failures.append(f"{root}: no PE candidates found")
 
     found_paths = {relative.casefold() for relative, _ in found}
@@ -79,6 +81,17 @@ def validate(
     for relative, path in found:
         try:
             machine = read_machine(path)
+            inspected.append((relative, path, machine))
+            if machine != expected:
+                failures.append(
+                    f"{relative}: machine 0x{machine:04X}, expected 0x{expected:04X}"
+                )
+        except (OSError, ValueError, struct.error) as error:
+            failures.append(f"{relative}: {error}")
+
+    if manifest_out is not None and not failures:
+        records = []
+        for relative, path, machine in inspected:
             size, sha256 = file_size_and_sha256(path)
             records.append(
                 {
@@ -88,14 +101,6 @@ def validate(
                     "machine": f"0x{machine:04X}",
                 }
             )
-            if machine != expected:
-                failures.append(
-                    f"{relative}: machine 0x{machine:04X}, expected 0x{expected:04X}"
-                )
-        except (OSError, ValueError, struct.error) as error:
-            failures.append(f"{relative}: {error}")
-
-    if manifest_out is not None and not failures:
         manifest = {
             "schema_version": 1,
             "architecture": architecture,

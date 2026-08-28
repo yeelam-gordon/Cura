@@ -69,6 +69,24 @@ def test_zero_candidates_and_required_python3_dll(tmp_path, capsys):
     assert "missing required PE: python3.dll" in errors
 
 
+def test_missing_root_reports_missing_path(tmp_path, capsys):
+    missing = tmp_path / "missing"
+    assert validator.validate(missing, "arm64", [], None) == 1
+    errors = capsys.readouterr().err
+    assert "path does not exist" in errors
+    assert "no PE candidates" not in errors
+
+
+def test_validation_without_manifest_does_not_hash(tmp_path, monkeypatch):
+    write_pe(tmp_path / "arm.exe", 0xAA64)
+
+    def unexpected_hash(_path):
+        raise AssertionError("hashing is unnecessary without a manifest")
+
+    monkeypatch.setattr(validator, "file_size_and_sha256", unexpected_hash)
+    assert validator.validate(tmp_path, "arm64", [], None) == 0
+
+
 def test_missing_required_path_fails(tmp_path, capsys):
     write_pe(tmp_path / "UltiMaker-Cura.exe", 0xAA64)
     assert validator.validate(
