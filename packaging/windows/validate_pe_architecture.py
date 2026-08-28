@@ -3,7 +3,7 @@ import hashlib
 import json
 import struct
 import sys
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 
 MACHINES = {"arm64": 0xAA64, "x64": 0x8664}
@@ -57,7 +57,7 @@ def validate(
 
     found_paths = {relative.casefold() for relative, _ in found}
     for required_path in required:
-        normalized = Path(required_path).as_posix()
+        normalized = PurePosixPath(required_path.replace("\\", "/")).as_posix()
         if normalized.casefold() not in found_paths:
             failures.append(f"missing required PE: {normalized}")
 

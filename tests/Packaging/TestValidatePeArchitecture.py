@@ -69,3 +69,8 @@ def test_missing_required_path_fails(tmp_path, capsys):
         tmp_path, "arm64", ["UltiMaker-Cura.exe", "python3.dll"], None
     ) == 1
     assert "missing required PE: python3.dll" in capsys.readouterr().err
+
+
+def test_required_path_accepts_windows_separators_on_any_host(tmp_path):
+    write_pe(tmp_path / "Nested" / "a.exe", 0xAA64)
+    assert validator.validate(tmp_path, "arm64", [r"Nested\a.exe"], None) == 0

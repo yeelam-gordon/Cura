@@ -10,11 +10,16 @@ import pytest
 
 
 MODULE_PATH = Path(__file__).parents[2] / "packaging" / "msi" / "create_windows_msi.py"
-sys.modules.setdefault("semver", types.SimpleNamespace(Version=object))
-sys.modules.setdefault("jinja2", types.SimpleNamespace(Template=object))
-SPEC = importlib.util.spec_from_file_location("create_windows_msi", MODULE_PATH)
-msi = importlib.util.module_from_spec(SPEC)
-SPEC.loader.exec_module(msi)
+with patch.dict(
+    sys.modules,
+    {
+        "semver": types.SimpleNamespace(Version=object),
+        "jinja2": types.SimpleNamespace(Template=object),
+    },
+):
+    SPEC = importlib.util.spec_from_file_location("create_windows_msi", MODULE_PATH)
+    msi = importlib.util.module_from_spec(SPEC)
+    SPEC.loader.exec_module(msi)
 
 
 def successful_tools(command, check):
@@ -96,7 +101,14 @@ def test_success_without_light_output_fails(tmp_path):
 
 def test_invalid_architecture_rejected(monkeypatch, capsys):
     monkeypatch.setattr(sys, "argv", [str(MODULE_PATH), "--architecture", "sparc"])
-    with pytest.raises(SystemExit) as error:
-        runpy.run_path(str(MODULE_PATH), run_name="__main__")
+    with patch.dict(
+        sys.modules,
+        {
+            "semver": types.SimpleNamespace(Version=object),
+            "jinja2": types.SimpleNamespace(Template=object),
+        },
+    ):
+        with pytest.raises(SystemExit) as error:
+            runpy.run_path(str(MODULE_PATH), run_name="__main__")
     assert error.value.code == 2
     assert "invalid choice" in capsys.readouterr().err

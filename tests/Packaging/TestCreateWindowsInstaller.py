@@ -9,11 +9,16 @@ import pytest
 
 
 MODULE_PATH = Path(__file__).parents[2] / "packaging" / "NSIS" / "create_windows_installer.py"
-sys.modules.setdefault("semver", types.SimpleNamespace(Version=object))
-sys.modules.setdefault("jinja2", types.SimpleNamespace(Template=object))
-SPEC = importlib.util.spec_from_file_location("create_windows_installer", MODULE_PATH)
-installer = importlib.util.module_from_spec(SPEC)
-SPEC.loader.exec_module(installer)
+with patch.dict(
+    sys.modules,
+    {
+        "semver": types.SimpleNamespace(Version=object),
+        "jinja2": types.SimpleNamespace(Template=object),
+    },
+):
+    SPEC = importlib.util.spec_from_file_location("create_windows_installer", MODULE_PATH)
+    installer = importlib.util.module_from_spec(SPEC)
+    SPEC.loader.exec_module(installer)
 
 
 def test_build_uses_check_and_requires_nonempty_output(tmp_path):
