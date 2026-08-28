@@ -138,12 +138,12 @@ def build(dist_path: Path, filename: Path, architecture: str):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Create Windows msi installer of Cura.")
-    parser.add_argument("--source_path", type=Path, help="Path to Conan install Cura folder.")
-    parser.add_argument("--dist_path", type=Path, help="Path to Pyinstaller dist folder")
-    parser.add_argument("--filename", type=Path,
+    parser.add_argument("--source_path", required=True, type=Path, help="Path to Conan install Cura folder.")
+    parser.add_argument("--dist_path", required=True, type=Path, help="Path to Pyinstaller dist folder")
+    parser.add_argument("--filename", required=True, type=Path,
                         help="Filename of the exe (e.g. 'UltiMaker-Cura-5.1.0-beta-Windows-X64.msi')")
-    parser.add_argument("--name", type=str, help="App name (e.g. 'UltiMaker Cura')")
-    parser.add_argument("--version", type=str, help="The full cura version, e.g. 5.9.0-beta.1+24132")
+    parser.add_argument("--name", required=True, type=str, help="App name (e.g. 'UltiMaker Cura')")
+    parser.add_argument("--version", required=True, type=str, help="The full cura version, e.g. 5.9.0-beta.1+24132")
     parser.add_argument("--architecture", choices=("x64", "arm64"), default="x64")
     args = parser.parse_args()
     source_path = args.source_path.resolve()

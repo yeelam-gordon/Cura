@@ -112,3 +112,18 @@ def test_invalid_architecture_rejected(monkeypatch, capsys):
             runpy.run_path(str(MODULE_PATH), run_name="__main__")
     assert error.value.code == 2
     assert "invalid choice" in capsys.readouterr().err
+
+
+def test_cli_requires_packaging_inputs(monkeypatch, capsys):
+    monkeypatch.setattr(sys, "argv", [str(MODULE_PATH)])
+    with patch.dict(
+        sys.modules,
+        {
+            "semver": types.SimpleNamespace(Version=object),
+            "jinja2": types.SimpleNamespace(Template=object),
+        },
+    ):
+        with pytest.raises(SystemExit) as error:
+            runpy.run_path(str(MODULE_PATH), run_name="__main__")
+    assert error.value.code == 2
+    assert "required" in capsys.readouterr().err

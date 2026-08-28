@@ -1,4 +1,5 @@
 import importlib.util
+import runpy
 import subprocess
 import sys
 import types
@@ -43,6 +44,21 @@ def test_nonzero_tool_failure_propagates(tmp_path):
     ):
         with pytest.raises(subprocess.CalledProcessError):
             installer.build(str(tmp_path), "cura.exe")
+
+
+def test_cli_requires_packaging_inputs(monkeypatch, capsys):
+    monkeypatch.setattr(sys, "argv", [str(MODULE_PATH)])
+    with patch.dict(
+        sys.modules,
+        {
+            "semver": types.SimpleNamespace(Version=object),
+            "jinja2": types.SimpleNamespace(Template=object),
+        },
+    ):
+        with pytest.raises(SystemExit) as error:
+            runpy.run_path(str(MODULE_PATH), run_name="__main__")
+    assert error.value.code == 2
+    assert "required" in capsys.readouterr().err
 
 
 @pytest.mark.parametrize("empty", [False, True])
