@@ -1,0 +1,48 @@
+import importlib.util
+import subprocess
+import sys
+import types
+from pathlib import Path
+from unittest.mock import patch
+
+import pytest
+
+
+MODULE_PATH = Path(__file__).parents[2] / "packaging" / "NSIS" / "create_windows_installer.py"
+sys.modules.setdefault("semver", types.SimpleNamespace(Version=object))
+sys.modules.setdefault("jinja2", types.SimpleNamespace(Template=object))
+SPEC = importlib.util.spec_from_file_location("create_windows_installer", MODULE_PATH)
+installer = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(installer)
+
+
+def test_build_uses_check_and_requires_nonempty_output(tmp_path):
+    (tmp_path / "UltiMaker-Cura.nsi").write_text("nsi", encoding="utf-8")
+
+    def successful(command, check):
+        assert check is True
+        (tmp_path / "cura.exe").write_bytes(b"exe")
+
+    with patch.object(installer.subprocess, "run", side_effect=successful) as run:
+        installer.build(str(tmp_path), "cura.exe")
+    assert run.call_args.kwargs["check"] is True
+
+
+def test_nonzero_tool_failure_propagates(tmp_path):
+    with patch.object(
+        installer.subprocess,
+        "run",
+        side_effect=subprocess.CalledProcessError(1, ["makensis"]),
+    ):
+        with pytest.raises(subprocess.CalledProcessError):
+            installer.build(str(tmp_path), "cura.exe")
+
+
+@pytest.mark.parametrize("empty", [False, True])
+def test_success_with_missing_or_empty_output_fails(tmp_path, empty):
+    (tmp_path / "UltiMaker-Cura.nsi").write_text("nsi", encoding="utf-8")
+    if empty:
+        (tmp_path / "cura.exe").touch()
+    with patch.object(installer.subprocess, "run", return_value=None):
+        with pytest.raises(RuntimeError, match="not created or is empty"):
+            installer.build(str(tmp_path), "cura.exe")
