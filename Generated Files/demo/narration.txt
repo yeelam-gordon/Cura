@@ -1,0 +1,16 @@
+Windows Arm64 support in Cura was not just a build flag. The original audit found that the Arm installer selected the x64 Visual C++ runtime path and lacked the signing parity present in the mature x64 workflow.
+
+Our manager-and-worker process turned that finding into an evidence chain. Audit, design, risk review, implementation, code review, regression repair, readiness, and demo production each produced a bounded handoff. Hashes protected the handoffs, and reviewers forced defects in provenance, artifact identity, and matrix naming back through the loop.
+
+The implemented after state is fail closed. Cura now has a dependency-free PE architecture validator, architecture-aware MSI generation, checked packaging subprocesses, and tests for malformed, mixed, missing, and empty outputs. The reusable workflows now carry exact workflow identity, stable platform names, architecture-qualified artifacts, and canonical file contracts with sizes and hashes.
+
+The Arm path now requires native Arm host and Python identity before build work, discovers the Arm runtime instead of the x64 path, requires the native Python runtime DLL, validates the complete PE payload, transfers only a verified unsigned contract, and prepares internal and final signature verification. A hosted Arm smoke stage verifies the signed contract and engine command, but that stage has not been executed here.
+
+Local proof is strong and specific. The final readiness record shows every local packaging and workflow suite passed, compilation and YAML parsing passed, each supported matrix case matched, Linux and Wasm names remained distinct, installer artifact names stayed architecture-qualified, forbidden patterns were absent, and both repository diffs were clean.
+
+The multiplier is the method, not one patch. The validator, provenance checker, artifact contract, matrix identity, and acceptance runbook form reusable release-engineering controls for other architecture ports and upstream review across Cura and its shared workflow repository.
+
+The boundary is equally important. We do not claim hosted CI, production signing, a real Arm payload, installer lifecycle, GUI execution, physical Arm behavior, performance, power, or stable publication.
+
+The next step is an exact-commit package and installer proof, followed by secure production signing, hosted Arm smoke, x64 regression, physical EXE and MSI acceptance, and explicit maintainer approval. Locally, this is ready for external validation; publication remains gated.
+

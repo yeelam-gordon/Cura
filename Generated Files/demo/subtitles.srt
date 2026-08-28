@@ -1,0 +1,56 @@
+1
+00:00:00,000 --> 00:00:12,500
+Windows Arm64 support in Cura was not just a build flag.
+
+2
+00:00:12,500 --> 00:00:27,000
+The original audit found that the Arm installer selected the x64 Visual C++ runtime path and lacked the signing parity present in the mature x64 workflow.
+
+3
+00:00:27,000 --> 00:00:38,500
+Our manager-and-worker process turned that finding into an evidence chain.
+
+4
+00:00:38,500 --> 00:00:55,000
+Audit, design, risk review, implementation, code review, regression repair, readiness, and demo production each produced a bounded handoff.
+
+5
+00:00:55,000 --> 00:01:10,000
+Hashes protected the handoffs, and reviewers forced defects in provenance, artifact identity, and matrix naming back through the loop.
+
+6
+00:01:10,000 --> 00:01:26,000
+The implemented after state is fail closed. Cura now has a dependency-free PE architecture validator, architecture-aware MSI generation, checked packaging subprocesses, and tests for malformed, mixed, missing, and empty outputs.
+
+7
+00:01:26,000 --> 00:01:39,500
+The reusable workflows now carry exact workflow identity, stable platform names, architecture-qualified artifacts, and canonical file contracts with sizes and hashes.
+
+8
+00:01:39,500 --> 00:01:57,500
+The Arm path now requires native Arm host and Python identity before build work, discovers the Arm runtime instead of the x64 path, requires the native Python runtime DLL, validates the complete PE payload, transfers only a verified unsigned contract, and prepares internal and final signature verification.
+
+9
+00:01:57,500 --> 00:02:09,000
+A hosted Arm smoke stage verifies the signed contract and engine command, but that stage has not been executed here.
+
+10
+00:02:09,000 --> 00:02:27,000
+Local proof is strong and specific. The final readiness record shows every local packaging and workflow suite passed, compilation and YAML parsing passed, each supported matrix case matched, Linux and Wasm names remained distinct, installer artifact names stayed architecture-qualified, forbidden patterns were absent, and both repository diffs were clean.
+
+11
+00:02:27,000 --> 00:02:44,500
+The multiplier is the method, not one patch. The validator, provenance checker, artifact contract, matrix identity, and acceptance runbook form reusable release-engineering controls for other architecture ports and upstream review across Cura and its shared workflow repository.
+
+12
+00:02:44,500 --> 00:02:58,500
+The boundary is equally important. We do not claim hosted CI, production signing, a real Arm payload, installer lifecycle, GUI execution, physical Arm behavior, performance, power, or stable publication.
+
+13
+00:02:58,500 --> 00:03:16,000
+The next step is an exact-commit package and installer proof, followed by secure production signing, hosted Arm smoke, x64 regression, physical EXE and MSI acceptance, and explicit maintainer approval.
+
+14
+00:03:16,000 --> 00:03:22,000
+Locally, this is ready for external validation; publication remains gated.
+
