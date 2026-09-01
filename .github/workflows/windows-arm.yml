@@ -34,10 +34,18 @@ on:
         type: choice
         options:
           - self-hosted-Windows-ARM64
+      package_workflow_run_id:
+        description: 'Validated package workflow run ID'
+        required: true
+        type: string
+      package_workflow_run_attempt:
+        description: 'Validated package workflow run attempt'
+        required: true
+        type: string
 
 jobs:
   windows-installer:
-    uses: ultimaker/cura-workflows/.github/workflows/cura-installer-windows-arm.yml@main
+    uses: yeelam-gordon/cura-workflows/.github/workflows/cura-installer-windows-arm.yml@36374901c57bb0be6279a285f11985199f685dc1
     with:
       cura_conan_version: ${{ inputs.cura_conan_version }}
       package_overrides: ${{ inputs.package_overrides }}
@@ -45,4 +53,8 @@ jobs:
       enterprise: ${{ inputs.enterprise }}
       staging: ${{ inputs.staging }}
       operating_system: ${{ inputs.operating_system }}
+      signing_operating_system: self-hosted-Windows-X64
+      cura_workflows_ref: 36374901c57bb0be6279a285f11985199f685dc1
+      package_workflow_run_id: ${{ inputs.package_workflow_run_id }}
+      package_workflow_run_attempt: ${{ inputs.package_workflow_run_attempt }}
     secrets: inherit
