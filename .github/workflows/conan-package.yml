@@ -34,5 +34,14 @@ on:
 
 jobs:
   conan-package:
-    uses: ultimaker/cura-workflows/.github/workflows/conan-package.yml@main
+    uses: yeelam-gordon/cura-workflows/.github/workflows/conan-package.yml@775961550b9b491e0f1d4a781aa13f7159f27180
+    with:
+      cura_workflows_ref: 775961550b9b491e0f1d4a781aa13f7159f27180
+      allow_non_default_branch_package_create: true
+      validation_skip_recipe_upload: true
+      platform_linux: false
+      platform_windows: false
+      platform_mac: false
+      platform_windows_arm64: true
+      platform_wasm: false
     secrets: inherit
